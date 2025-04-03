@@ -17,9 +17,11 @@ escolha = st.sidebar.radio("", menu)
 # Sessão de Colaboradores
 st.sidebar.title("Colaboradores 🤝")
 colaboradores = [
-    {"nome": "Ana Paula", "foto": "porto-de-santos.jpg"},
-    {"nome": "Carlos Eduardo", "foto": "porto-de-santos.jpg"},
-    {"nome": "Mariana Silva", "foto": "porto-de-santos.jpg"},
+    {"nome": "Vinicius Silva - RM553240", "foto": "vinicius.jpg"},
+    {"nome": "Diogo Julio - RM553837", "foto": "diogo.jpg"},
+    {"nome": "Jonata Rafael - RM552939", "foto": "jonata.jpg"},
+    {"nome": "Victor Didoff - RM552965", "foto": "didoff.jpg"},
+    {"nome": "Matheu Zottis - RM94119", "foto": "zottis.jpg"},
 ]
 
 for colaborador in colaboradores:
@@ -67,6 +69,17 @@ if escolha == "Home 🏠":
 elif escolha == "Dados 📊":
     st.title("Dados de Exportação Brasileira")
     
+    st.subheader("Explicação das Colunas")
+    st.write("""
+    - **Data**: Representa o período da exportação (provavelmente em anos).
+    - **Valor_BK**: Exportações de Bens de Capital (máquinas, equipamentos industriais).
+    - **Valor_BI**: Exportações de Bens Intermediários (insumos usados na produção).
+    - **Valor_BC**: Exportações de Bens de Consumo (produtos finais como eletrodomésticos).
+    - **Valor_CL**: Exportações de Combustíveis e Lubrificantes.
+    - **VarBK, VarBI, VarBC, VarCL**: Variação percentual das exportações comparada ao período anterior.
+    - **Part_BK, Part_BI, Part_BC, Part_CL**: Participação percentual de cada categoria no total das exportações.
+    """)
+
     # Filtro pela primeira coluna
     primeira_coluna = df.columns[0]
     valores_unicos = df[primeira_coluna].unique()
@@ -135,6 +148,7 @@ elif escolha == "Entendimentos 📈":
 if escolha == "Análise 📋":
     st.title("Análise Estatística das Exportações")
     
+    
     st.subheader("Formulação de Hipóteses")
     st.write("""
     Para avaliar a variação das exportações brasileiras, formulamos as seguintes hipóteses:
@@ -142,7 +156,7 @@ if escolha == "Análise 📋":
     - **Hipótese Alternativa (H₁)**: Existe uma diferença significativa nos valores médios das exportações ao longo do tempo.
     """)
     
-    # Escolher uma coluna de valores
+    # Escolher uma coluna de valores para análise
     coluna_valor = "Valor_BK"  # Escolha uma coluna numérica do dataset
     valores = df[coluna_valor].dropna()
     
@@ -151,16 +165,24 @@ if escolha == "Análise 📋":
     t_stat, p_valor = stats.ttest_1samp(valores, media_teorica)
     
     st.subheader("Teste t para uma amostra")
+    st.write("""
+    O **teste t para uma amostra** verifica se a média das exportações de Bens de Capital (Valor_BK) 
+    difere significativamente de um valor hipotético. Se o valor-p for menor que 0.05, rejeitamos a hipótese nula.
+    """)
     st.write(f"Estatística t: {t_stat:.4f}")
     st.write(f"Valor-p: {p_valor:.4f}")
     
     if p_valor < 0.05:
-        st.write("Rejeitamos H₀: Há evidências de que as exportações mudaram significativamente.")
+        st.write("Rejeitamos H₀: Há evidências de que as exportações de Bens de Capital mudaram significativamente.")
     else:
         st.write("Falhamos em rejeitar H₀: Não há evidências suficientes para afirmar que as exportações mudaram.")
     
     # Teste Qui-Quadrado para verificar a distribuição dos valores de exportação
     st.subheader("Teste Qui-Quadrado")
+    st.write("""
+    O **teste Qui-Quadrado** analisa a distribuição dos valores de exportação dentro de categorias.
+    Se o valor-p for menor que 0.05, a distribuição não é uniforme, indicando maior concentração em algumas categorias.
+    """)
     df["Faixa de Valor"] = pd.qcut(df[coluna_valor], q=4, labels=["Baixo", "Médio-Baixo", "Médio-Alto", "Alto"])
     contagem_faixas = df["Faixa de Valor"].value_counts()
     chi2, p_chi = stats.chisquare(contagem_faixas)
@@ -177,13 +199,13 @@ if escolha == "Análise 📋":
     st.subheader("Respostas às Perguntas")
     st.write("""
     1. **As exportações brasileiras cresceram ao longo do tempo?**
-       - A partir do teste t realizado, observamos que a média atual das exportações não difere significativamente de um valor hipotético reduzido em 10%, o que sugere que o crescimento pode não ser estatisticamente relevante.
+       - O teste t indica que a média das exportações de Bens de Capital pode ter sofrido mudanças significativas, sugerindo crescimento ou variação relevante.
     
     2. **Quais setores contribuem mais para a exportação total?**
-       - A análise da distribuição dos valores de exportação usando o teste Qui-Quadrado sugere que os setores não estão distribuídos uniformemente. Setores como commodities e manufatura apresentam contribuições dominantes.
+       - O teste Qui-Quadrado mostra que as exportações não são uniformes entre categorias, indicando que setores como Bens de Capital e Bens Intermediários dominam.
     
     3. **Existe sazonalidade nas exportações?**
-       - Para verificar sazonalidade, seria necessário realizar uma análise de séries temporais. No entanto, o histograma indica que há variações nos valores exportados ao longo do tempo.
+       - A análise sugere variações nos valores exportados ao longo do tempo, mas uma análise de séries temporais seria necessária para confirmar padrões sazonais.
     """)
     
     # Visualização dos resultados
@@ -195,8 +217,10 @@ if escolha == "Análise 📋":
     ax.legend()
     st.pyplot(fig)
     
+    st.subheader("Possíveis Explicações")
     st.write("""
-    - O histograma acima mostra a distribuição dos valores de exportação.
-    - As linhas vermelha e azul indicam a média teórica e a média observada, respectivamente.
-    - Se as médias diferem significativamente, podemos ter evidências de mudanças estruturais nas exportações.
+    - Mudanças na demanda global podem ter impulsionado ou reduzido exportações.
+    - Política econômica, incentivos fiscais e tarifas de importação podem ter influenciado os setores exportadores.
+    - Fatores como crises econômicas, pandemias e conflitos geopolíticos também impactam o volume e a distribuição das exportações.
     """)
+
