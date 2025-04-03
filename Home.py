@@ -3,6 +3,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import scipy.stats as stats
+import seaborn as sns
 from streamlit_extras.app_logo import add_logo
 
 
