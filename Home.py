@@ -69,82 +69,58 @@ if escolha == "Home 🏠":
 elif escolha == "Dados 📊":
     st.title("Dados de Exportação Brasileira")
     
-    st.subheader("Explicação das Colunas")
-    st.write("""
-    - **Data**: Representa o período da exportação (provavelmente em anos).
-    - **Valor_BK**: Exportações de Bens de Capital (máquinas, equipamentos industriais).
-    - **Valor_BI**: Exportações de Bens Intermediários (insumos usados na produção).
-    - **Valor_BC**: Exportações de Bens de Consumo (produtos finais como eletrodomésticos).
-    - **Valor_CL**: Exportações de Combustíveis e Lubrificantes.
-    - **VarBK, VarBI, VarBC, VarCL**: Variação percentual das exportações comparada ao período anterior.
-    - **Part_BK, Part_BI, Part_BC, Part_CL**: Participação percentual de cada categoria no total das exportações.
-    """)
-
-    # Filtro pela primeira coluna
-    primeira_coluna = df.columns[0]
-    valores_unicos = df[primeira_coluna].unique()
-    filtro = st.selectbox(f"Filtrar por {primeira_coluna}", ["Todos"] + list(valores_unicos))
-
-    if filtro != "Todos":
-        df = df[df[primeira_coluna] == filtro]
-    
     st.write("Aqui estão os dados utilizados para análise:")
-    st.dataframe(df.head())
+    st.dataframe(df)
     
-    st.subheader("Média, Moda e Mediana")
-    colunas_numericas = df.select_dtypes(include=[np.number])
-    media = colunas_numericas.mean()
-    moda = colunas_numericas.mode().iloc[0]
-    mediana = colunas_numericas.median()
+    # Obter as colunas numéricas disponíveis (exceto 'Data' se presente)
+    numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
     
-    st.write("**Média**: Representa o valor médio das exportações.")
-    st.write(media)
+    # Permitir ao usuário selecionar uma coluna para análise estatística
+    selected_column = st.selectbox("Selecione a coluna para análise estatística:", numeric_cols)
     
-    st.write("**Moda**: O valor mais frequente nos dados.")
-    st.write(moda)
+    # Exibir os dados da coluna selecionada junto com a coluna 'Data', se existir
+    if "Data" in df.columns:
+        data_for_analysis = df[["Data", selected_column]].dropna()
+    else:
+        data_for_analysis = df[[selected_column]].dropna()   
     
-    st.write("**Mediana**: O valor central dos dados ordenados.")
-    st.write(mediana)
 
-elif escolha == "Entendimentos 📈":
-    st.title("Análises Estatísticas e Entendimentos")
+    col1,col2,col3 = st.columns(3)
+    # Calcular as estatísticas: Média, Mediana e Moda
+    mean_val = data_for_analysis[selected_column].mean()
+    median_val = data_for_analysis[selected_column].median()
+    mode_series = data_for_analysis[selected_column].mode()
+    mode_val = mode_series.iloc[0] if not mode_series.empty else np.nan
     
-    st.subheader("Intervalos de Confiança")
-    st.write("""
-    O intervalo de confiança é uma técnica estatística que nos permite estimar a variação provável dos dados.
-    Aqui, aplicamos essa abordagem para compreender a variação nos valores das exportações brasileiras ao longo do tempo.
-    """)
+    st.subheader("Estatísticas da Coluna Selecionada")
+    col1.write(f"**Média:** {mean_val:.2f}")
+    col2.write(f"**Mediana:** {median_val:.2f}")
+    col3.write(f"**Moda:** {mode_val:.2f}")
     
-    # Selecionar colunas numéricas relacionadas a valores
-    colunas_valor = [col for col in df.columns if "valor" in col.lower()]
-    colunas_numericas = df[colunas_valor]
+    # Resumo interpretativo da coluna selecionada
+    st.subheader("Resumo da Coluna Selecionada")
+    summary_text = ""
+    if selected_column == "Valor_BK":
+        summary_text = ("Esta coluna representa os valores exportados de **Bens de Capital**. "
+                        "Esses bens incluem máquinas, equipamentos industriais e outros ativos produtivos, "
+                        "essenciais para a estruturação do setor industrial e para investimentos em infraestrutura.")
+    elif selected_column == "Valor_BI":
+        summary_text = ("Esta coluna representa os valores exportados de **Bens Intermediários**. "
+                        "São insumos essenciais usados na produção de outros produtos, como aço e químicos, "
+                        "indicando a capacidade do país de fornecer matéria-prima para processos industriais.")
+    elif selected_column == "Valor_BC":
+        summary_text = ("Esta coluna representa os valores exportados de **Bens de Consumo**. "
+                        "Estes são produtos finais destinados ao consumidor, como eletrodomésticos e roupas, "
+                        "indicando a competitividade dos produtos brasileiros no mercado internacional.")
+    elif selected_column == "Valor_CL":
+        summary_text = ("Esta coluna representa os valores exportados de **Combustíveis e Lubrificantes**. "
+                        "Esses produtos são essenciais para o setor de transportes e para a indústria, "
+                        "refletindo o desempenho do segmento de energia nas exportações.")
+    else:
+        summary_text = ("Esta coluna contém dados numéricos relevantes para a análise das exportações brasileiras.")
+    
+    st.write(summary_text)
 
-    # Cálculo de Intervalo de Confiança
-    confianca = 0.95
-    intervalos = {}
-    for coluna in colunas_numericas.columns:
-        media_coluna = colunas_numericas[coluna].mean()
-        desvio_padrao = colunas_numericas[coluna].std()
-        n = len(colunas_numericas[coluna])
-        intervalo = stats.t.interval(confianca, df=n-1, loc=media_coluna, scale=desvio_padrao/np.sqrt(n))
-        intervalos[coluna] = intervalo
-    
-    # Criar um DataFrame para visualização
-    intervalos_df = pd.DataFrame(intervalos, index=["Limite Inferior", "Limite Superior"]).T
-    intervalos_df["Média"] = colunas_numericas.mean()
-
-    # Plotar os intervalos de confiança
-    st.subheader("Intervalos de Confiança para Colunas de Valor")
-    st.write("O gráfico abaixo mostra os intervalos de confiança de 95% para cada métrica de valor.")
-    st.bar_chart(intervalos_df[["Limite Inferior", "Média", "Limite Superior"]])
-    
-    # Interpretação dos resultados
-    st.write("""
-    - Se o intervalo de confiança for muito amplo, indica maior incerteza nos valores exportados.
-    - Se o intervalo for estreito, significa que as exportações tendem a ser mais consistentes ao longo do tempo.
-    - Comparar os intervalos entre diferentes categorias pode revelar tendências importantes sobre os setores mais estáveis.
-    """)
-    
 if escolha == "Análise 📋":
     st.title("Análise Estatística das Exportações")
     
