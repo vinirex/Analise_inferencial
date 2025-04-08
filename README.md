@@ -26,15 +26,15 @@ O dataset contém informações detalhadas sobre a exportação brasileira, incl
 Este projeto foi desenvolvido pelos seguintes membros:
 
 - **Vinicius Silva** - RM553240  
-    ![Vinicius Silva](img/vinicius.jpg)  
+    <img src="img/vinicius.jpg" alt="Vinicius Silva" width="100">  
 - **Diogo Julio** - RM553837  
-    ![Diogo Julio](img/diogo.jpg)  
+    <img src="img/diogo.jpg" alt="Diogo Julio" width="100">  
 - **Jonata Rafael** - RM552939  
-    ![Jonata Rafael](img/jonata.jpg)  
+    <img src="img/jonata.jpg" alt="Jonata Rafael" width="100">  
 - **Victor Didoff** - RM552965  
-    ![Victor Didoff](img/didoff.jpg)  
+    <img src="img/didoff.jpg" alt="Victor Didoff" width="100">  
 - **Matheu Zottis** - RM94119  
-    ![Matheu Zottis](img/zottis.jpg)  
+    <img src="img/zottis.jpg" alt="Matheu Zottis" width="100">  
 
 ## Tecnologias Utilizadas
 
