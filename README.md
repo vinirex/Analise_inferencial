@@ -7,9 +7,11 @@ https://exportacao-brasileira.streamlit.app/
 
 ## Funcionalidades
 
-- **Home 🏠**: Introdução ao tema e apresentação geral dos dados de exportação brasileira.
-- **Dados 📊**: Visualização dos dados, estatísticas descritivas e gráficos interativos.
-- **Análise 📋**: Aplicação de testes estatísticos e comparações entre diferentes categorias de exportação.
+- **Home 🏠**: Introdução ao tema e apresentação geral dos dados de exportação brasileira.  
+- **Dados 📊**: Visualização dos dados, estatísticas descritivas e gráficos interativos.  
+- **Entendimentos 📚**: Principais padrões, variações identificadas nos dados e reflexos no cenário econômico brasileiro e global.  
+
+Essa seção resume os aprendizados mais relevantes da análise.
 
 ## Dados Utilizados
 
@@ -24,15 +26,15 @@ O dataset contém informações detalhadas sobre a exportação brasileira, incl
 Este projeto foi desenvolvido pelos seguintes membros:
 
 - **Vinicius Silva** - RM553240  
-  ![Vinicius Silva](vinicius.jpg)  
+    ![Vinicius Silva](img/vinicius.jpg)  
 - **Diogo Julio** - RM553837  
-  ![Diogo Julio](diogo.jpg)  
+    ![Diogo Julio](img/diogo.jpg)  
 - **Jonata Rafael** - RM552939  
-  ![Jonata Rafael](jonata.jpg)  
+    ![Jonata Rafael](img/jonata.jpg)  
 - **Victor Didoff** - RM552965  
-  ![Victor Didoff](didoff.jpg)  
+    ![Victor Didoff](img/didoff.jpg)  
 - **Matheu Zottis** - RM94119  
-  ![Matheu Zottis](zottis.jpg)  
+    ![Matheu Zottis](img/zottis.jpg)  
 
 ## Tecnologias Utilizadas
 
