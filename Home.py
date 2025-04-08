@@ -265,24 +265,11 @@ elif escolha == "Análise 📋":
         else:
             st.write("O gráfico temporal não pode ser exibido pois a coluna 'Data' não está disponível.")
 
-        # Gráfico de dispersão para comparar as duas colunas
-        st.subheader("Análise Comparativa: Gráfico de Dispersão")
-        fig_scatter, ax_scatter = plt.subplots(figsize=(8, 5))
-        sns.scatterplot(data=df_filtrado, x=col1_selecionada, y=col2_selecionada, hue="Data", palette="viridis", ax=ax_scatter)
-        ax_scatter.set_title(f"Relação entre {col1_selecionada} e {col2_selecionada}")
-        ax_scatter.set_xlabel(col1_selecionada)
-        ax_scatter.set_ylabel(col2_selecionada)
-        st.pyplot(fig_scatter)
-        st.write("""
-        O gráfico de dispersão apresenta a relação entre os valores das duas categorias selecionadas.  
-        As cores representam os diferentes anos, permitindo observar padrões sazonais, correlações ou mudanças estruturais ao longo do tempo.
-        """)
-        
 elif escolha == "Entendimentos 📚":
     st.write("---")
     st.subheader("Conclusões e Impactos no Contexto da Exportação Brasileira")
 
-    st.image("img/ExpoBR.jpg", width=80)
+    st.image("img/ExpoBR.jpg",use_container_width=True)
     st.markdown("""
     **🗓️ Para entendimento:**
     - O ano de **2025 ainda está em andamento**, o que pode afetar medidas como média, mediana e interpretação de tendências.
@@ -290,14 +277,14 @@ elif escolha == "Entendimentos 📚":
     """)
 
 
-    st.image("img\covid", width=80)
+    st.image("img/covid.jpg", width=300)
     st.markdown("""
     **📊 Interpretação Geral:**
     - Os **testes estatísticos** ajudam a entender se houve **mudanças significativas** nos padrões de exportação e se os dados estão distribuídos uniformemente.
     - A **comparação entre categorias de exportação**, filtradas por período, permite identificar **diferenças setoriais** ligadas a políticas públicas, flutuações da demanda internacional e eventos econômicos relevantes.
     """)
 
-    st.image("img/BREXPO.png", width=80)
+    st.image("img/BREXPO.png", width=300)
     st.markdown("""
     **💡 Sugestões de Interpretação:**
     - Resultados estatísticos significativos podem indicar **transformações nos investimentos** ou **na competitividade dos setores** exportadores.
