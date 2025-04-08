@@ -11,7 +11,7 @@ from streamlit_extras.app_logo import add_logo
 st.set_page_config(page_title="Exportação Brasileira", layout="wide")
 
 # Criando as páginas
-menu = ["Home 🏠", "Dados 📊", "Entendimentos 📈", "Análise 📋"]
+menu = ["Home 🏠", "Dados 📊", "Análise 📋"]
 escolha = st.sidebar.radio("", menu)
 
 # Sessão de Colaboradores
@@ -65,15 +65,16 @@ if escolha == "Home 🏠":
     - Existe uma sazonalidade nas exportações?
     - Como diferentes categorias de produtos contribuem para o total exportado?
     """)
+    st.write("## Aqui estão os dados utilizados para análise:")
+    st.dataframe(df)
     
 elif escolha == "Dados 📊":
     st.title("Dados de Exportação Brasileira")
     
-    st.write("Aqui estão os dados utilizados para análise:")
-    st.dataframe(df)
-    
-    # Obter as colunas numéricas disponíveis (exceto 'Data' se presente)
+    # Remover 'Data' da lista de colunas numéricas
     numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
+    if "Data" in numeric_cols:
+        numeric_cols.remove("Data")
     
     # Permitir ao usuário selecionar uma coluna para análise estatística
     selected_column = st.selectbox("Selecione a coluna para análise estatística:", numeric_cols)
@@ -82,121 +83,214 @@ elif escolha == "Dados 📊":
     if "Data" in df.columns:
         data_for_analysis = df[["Data", selected_column]].dropna()
     else:
-        data_for_analysis = df[[selected_column]].dropna()   
-    
+        data_for_analysis = df[[selected_column]].dropna()
 
-    col1,col2,col3 = st.columns(3)
-    # Calcular as estatísticas: Média, Mediana e Moda
+    # Calcular estatísticas
+    col1, col2, col3 = st.columns(3)
     mean_val = data_for_analysis[selected_column].mean()
     median_val = data_for_analysis[selected_column].median()
     mode_series = data_for_analysis[selected_column].mode()
     mode_val = mode_series.iloc[0] if not mode_series.empty else np.nan
     
-    st.subheader("Estatísticas da Coluna Selecionada")
-    col1.write(f"**Média:** {mean_val:.2f}")
-    col2.write(f"**Mediana:** {median_val:.2f}")
-    col3.write(f"**Moda:** {mode_val:.2f}")
+    col1.metric("Média", f"{mean_val:,.2f}")
+    col2.metric("Mediana", f"{median_val:,.2f}")
+    col3.metric("Moda", f"{mode_val:,.2f}")
     
     # Resumo interpretativo da coluna selecionada
     st.subheader("Resumo da Coluna Selecionada")
-    summary_text = ""
-    if selected_column == "Valor_BK":
-        summary_text = ("Esta coluna representa os valores exportados de **Bens de Capital**. "
-                        "Esses bens incluem máquinas, equipamentos industriais e outros ativos produtivos, "
-                        "essenciais para a estruturação do setor industrial e para investimentos em infraestrutura.")
-    elif selected_column == "Valor_BI":
-        summary_text = ("Esta coluna representa os valores exportados de **Bens Intermediários**. "
-                        "São insumos essenciais usados na produção de outros produtos, como aço e químicos, "
-                        "indicando a capacidade do país de fornecer matéria-prima para processos industriais.")
-    elif selected_column == "Valor_BC":
-        summary_text = ("Esta coluna representa os valores exportados de **Bens de Consumo**. "
-                        "Estes são produtos finais destinados ao consumidor, como eletrodomésticos e roupas, "
-                        "indicando a competitividade dos produtos brasileiros no mercado internacional.")
-    elif selected_column == "Valor_CL":
-        summary_text = ("Esta coluna representa os valores exportados de **Combustíveis e Lubrificantes**. "
-                        "Esses produtos são essenciais para o setor de transportes e para a indústria, "
-                        "refletindo o desempenho do segmento de energia nas exportações.")
-    else:
-        summary_text = ("Esta coluna contém dados numéricos relevantes para a análise das exportações brasileiras.")
-    
-    st.write(summary_text)
+    resumo_colunas = {
+        "Valor_BK": ("Valores exportados de **Bens de Capital** – máquinas e equipamentos industriais. "
+                     "Refletem o investimento em infraestrutura e desenvolvimento tecnológico."),
+        "Valor_BI": ("Valores exportados de **Bens Intermediários** – insumos como aço, químicos e componentes. "
+                     "São essenciais para a cadeia produtiva e indicam integração industrial."),
+        "Valor_BC": ("Valores exportados de **Bens de Consumo** – produtos finais como roupas e eletrodomésticos. "
+                     "Indicadores de competitividade do Brasil no mercado consumidor."),
+        "Valor_CL": ("Valores exportados de **Combustíveis e Lubrificantes** – óleo bruto, derivados e similares. "
+                     "Ligados à extração de petróleo e à matriz energética do país."),
+        "VarBK": ("**Variação percentual anual dos Bens de Capital** exportados. "
+                  "Indica crescimento ou retração do setor em relação ao ano anterior."),
+        "VarBI": ("**Variação percentual anual dos Bens Intermediários**. "
+                  "Aponta dinâmica da cadeia de produção industrial e demanda global."),
+        "VarBC": ("**Variação percentual anual dos Bens de Consumo**. "
+                  "Reflete alterações na demanda externa por produtos finais brasileiros."),
+        "VarCL": ("**Variação percentual anual de Combustíveis e Lubrificantes** exportados. "
+                  "Fortemente influenciada por preços internacionais e produção interna."),
+        "Part_BK": ("**Participação percentual dos Bens de Capital** nas exportações totais do Brasil. "
+                    "Demonstra o peso desse setor na economia exportadora."),
+        "Part_BI": ("**Participação percentual dos Bens Intermediários** no total exportado. "
+                    "Mostra a relevância da indústria de base."),
+        "Part_BC": ("**Participação percentual dos Bens de Consumo**. "
+                    "Aponta para a importância de bens acabados no portfólio exportador."),
+        "Part_CL": ("**Participação percentual dos Combustíveis e Lubrificantes**. "
+                    "Fortemente atrelado ao setor energético e commodities globais.")
+    }
 
-if escolha == "Análise 📋":
-    st.title("Análise Estatística das Exportações")
+    st.write(resumo_colunas.get(selected_column, 
+                                 "Esta coluna contém dados numéricos relevantes para a análise das exportações brasileiras."))
+    
+    # GRÁFICO DE LINHA TEMPORAL
+    st.subheader("Variação ao Longo do Tempo")
+    fig_line, ax_line = plt.subplots(figsize=(10, 4))
+    sns.lineplot(data=data_for_analysis, x="Data", y=selected_column, marker="o", ax=ax_line)
+    ax_line.set_title(f"{selected_column} ao longo do tempo")
+    ax_line.set_ylabel("Valor")
+    ax_line.set_xlabel("Ano")
+    st.pyplot(fig_line)
+    st.write("Este gráfico de linha mostra como os valores dessa categoria de exportação variaram ao longo dos anos. "
+             "É útil para identificar tendências, ciclos ou quedas bruscas relacionadas a eventos econômicos ou políticas externas.")
+
+    # HISTOGRAMA
+    st.subheader("Distribuição dos Valores")
+    fig_hist, ax_hist = plt.subplots(figsize=(8, 4))
+    sns.histplot(data_for_analysis[selected_column], bins=20, kde=True, ax=ax_hist)
+    ax_hist.set_title(f"Distribuição de {selected_column}")
+    st.pyplot(fig_hist)
+    st.write("O histograma permite observar a frequência dos valores exportados. Picos indicam valores mais recorrentes. "
+             "A curva de densidade (KDE) ajuda a visualizar a forma geral da distribuição: simétrica, enviesada, etc.")
+
+    # BOXPLOT
+    st.subheader("Boxplot da Coluna")
+    fig_box, ax_box = plt.subplots(figsize=(6, 4))
+    sns.boxplot(y=data_for_analysis[selected_column], ax=ax_box)
+    ax_box.set_title(f"Boxplot de {selected_column}")
+    st.pyplot(fig_box)
+    st.write("O boxplot ajuda a visualizar a dispersão dos dados, valores extremos (outliers) e a mediana. "
+             "É útil para avaliar a consistência das exportações ao longo do tempo.")
     
     
-    st.subheader("Formulação de Hipóteses")
+elif escolha == "Análise 📋":
+    st.title("Análise Estatística e Comparativa das Exportações")
+
+    st.subheader("1. Análise de Testes Estatísticos")
     st.write("""
-    Para avaliar a variação das exportações brasileiras, formulamos as seguintes hipóteses:
-    - **Hipótese Nula (H₀)**: Não há diferença significativa nos valores médios das exportações ao longo do tempo.
-    - **Hipótese Alternativa (H₁)**: Existe uma diferença significativa nos valores médios das exportações ao longo do tempo.
+    Nesta seção, aplicamos testes estatísticos para avaliar se os valores das exportações de Bens de Capital (Valor_BK) 
+    têm sofrido variações significativas ao longo do tempo.
     """)
     
-    # Escolher uma coluna de valores para análise
-    coluna_valor = "Valor_BK"  # Escolha uma coluna numérica do dataset
+    # Selecionar coluna para teste estatístico
+    coluna_valor = "Valor_BK"  # Representa os valores dos Bens de Capital
     valores = df[coluna_valor].dropna()
     
-    # Teste t para verificar se a média das exportações difere significativamente de um valor hipotético
-    media_teorica = valores.mean() * 0.9  # Testamos se a média atual difere 10% de um valor hipotético
+    # Teste t para comparar a média observada com uma média teórica (redução de 10%)
+    media_teorica = valores.mean() * 0.9
     t_stat, p_valor = stats.ttest_1samp(valores, media_teorica)
     
-    st.subheader("Teste t para uma amostra")
+    st.subheader("Teste t para uma Amostra")
     st.write("""
-    O **teste t para uma amostra** verifica se a média das exportações de Bens de Capital (Valor_BK) 
-    difere significativamente de um valor hipotético. Se o valor-p for menor que 0.05, rejeitamos a hipótese nula.
+    **Objetivo:** Verificar se a média dos valores exportados difere significativamente de um valor hipotético (redução de 10% da média atual).  
+    **Interpretação:** Se o valor-p for menor que 0.05, rejeitamos a hipótese nula, indicando mudança significativa.
     """)
     st.write(f"Estatística t: {t_stat:.4f}")
     st.write(f"Valor-p: {p_valor:.4f}")
-    
     if p_valor < 0.05:
-        st.write("Rejeitamos H₀: Há evidências de que as exportações de Bens de Capital mudaram significativamente.")
+        st.write("Conclusão: Rejeitamos H₀. Evidências apontam para mudanças significativas nas exportações de Bens de Capital.")
     else:
-        st.write("Falhamos em rejeitar H₀: Não há evidências suficientes para afirmar que as exportações mudaram.")
-    
-    # Teste Qui-Quadrado para verificar a distribuição dos valores de exportação
+        st.write("Conclusão: Falhamos em rejeitar H₀. Não há evidências suficientes de mudança significativa.")
+
     st.subheader("Teste Qui-Quadrado")
     st.write("""
-    O **teste Qui-Quadrado** analisa a distribuição dos valores de exportação dentro de categorias.
-    Se o valor-p for menor que 0.05, a distribuição não é uniforme, indicando maior concentração em algumas categorias.
+    **Objetivo:** Analisar se a distribuição dos valores de exportação se distribui uniformemente entre diferentes faixas.  
+    **Interpretação:** Um valor-p menor que 0.05 indica que os valores não estão uniformemente distribuídos, sugerindo concentração em certos intervalos.
     """)
     df["Faixa de Valor"] = pd.qcut(df[coluna_valor], q=4, labels=["Baixo", "Médio-Baixo", "Médio-Alto", "Alto"])
     contagem_faixas = df["Faixa de Valor"].value_counts()
     chi2, p_chi = stats.chisquare(contagem_faixas)
-    
     st.write(f"Estatística Qui-Quadrado: {chi2:.4f}")
     st.write(f"Valor-p: {p_chi:.4f}")
-    
     if p_chi < 0.05:
-        st.write("Rejeitamos H₀: A distribuição dos valores de exportação não é uniforme.")
+        st.write("Conclusão: Rejeitamos H₀. A distribuição dos valores não é uniforme.")
     else:
-        st.write("Falhamos em rejeitar H₀: Não há evidências suficientes para afirmar que os valores estão distribuídos de forma desigual.")
-    
-    # Responder às perguntas formuladas na aba Home
-    st.subheader("Respostas às Perguntas")
+        st.write("Conclusão: Falhamos em rejeitar H₀. Não há evidências suficientes para afirmar que a distribuição seja desigual.")
+
+    st.write("---")
+    st.subheader("2. Comparação entre Colunas e Filtros por Ano")
     st.write("""
-    1. **As exportações brasileiras cresceram ao longo do tempo?**
-       - O teste t indica que a média das exportações de Bens de Capital pode ter sofrido mudanças significativas, sugerindo crescimento ou variação relevante.
-    
-    2. **Quais setores contribuem mais para a exportação total?**
-       - O teste Qui-Quadrado mostra que as exportações não são uniformes entre categorias, indicando que setores como Bens de Capital e Bens Intermediários dominam.
-    
-    3. **Existe sazonalidade nas exportações?**
-       - A análise sugere variações nos valores exportados ao longo do tempo, mas uma análise de séries temporais seria necessária para confirmar padrões sazonais.
+    Nesta seção, você pode comparar a evolução de duas categorias de exportação ao longo dos anos.  
+    Utilize o filtro de anos para limitar a análise a um período específico e observe como os setores se comportam.
     """)
     
-    # Visualização dos resultados
-    st.subheader("Visualização dos Resultados")
-    fig, ax = plt.subplots(figsize=(10, 5))
-    sns.histplot(valores, bins=30, kde=True, ax=ax)
-    ax.axvline(media_teorica, color='red', linestyle='dashed', label='Média Teórica')
-    ax.axvline(valores.mean(), color='blue', linestyle='dashed', label='Média Observada')
-    ax.legend()
-    st.pyplot(fig)
-    
-    st.subheader("Possíveis Explicações")
-    st.write("""
-    - Mudanças na demanda global podem ter impulsionado ou reduzido exportações.
-    - Política econômica, incentivos fiscais e tarifas de importação podem ter influenciado os setores exportadores.
-    - Fatores como crises econômicas, pandemias e conflitos geopolíticos também impactam o volume e a distribuição das exportações.
-    """)
+   # Filtro por intervalo de Data (mantendo valores reais da coluna "Data")
+    if "Data" in df.columns:
+        datas = sorted(df["Data"].dropna().unique())
+
+        if len(datas) < 2:
+            st.warning("A coluna 'Data' possui apenas um valor. O filtro de intervalo não será aplicado.")
+            data_inicio = data_fim = datas[0]
+            df_filtrado = df[df["Data"] == data_inicio]
+            st.write(f"Exibindo dados da data: {data_inicio}")
+        else:
+            data_inicio, data_fim = st.select_slider(
+                "Selecione o intervalo de datas para análise:",
+                options=datas,
+                value=(datas[0], datas[-1])
+            )
+
+            if data_inicio == data_fim:
+                st.warning("Por favor, selecione duas datas diferentes para aplicar o filtro.")
+                df_filtrado = df[df["Data"] == data_inicio]
+            else:
+                df_filtrado = df[(df["Data"] >= data_inicio) & (df["Data"] <= data_fim)]
+                st.write(f"Exibindo dados do período: {data_inicio} até {data_fim}")
+                df_filtrado = df.copy()
+        
+        col_comp1, col_comp2 = st.columns(2)
+        # Ensure numeric_cols is defined before this block
+        numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
+        if "Data" in numeric_cols:
+            numeric_cols.remove("Data")
+        
+        with col_comp1:
+            col1_selecionada = st.selectbox("Selecione a 1ª coluna para comparação:", numeric_cols, key="comp1")
+        with col_comp2:
+            # Remover a coluna selecionada na primeira seleção para evitar comparação duplicada
+            cols_disp = [col for col in numeric_cols if col != col1_selecionada]
+            col2_selecionada = st.selectbox("Selecione a 2ª coluna para comparação:", cols_disp, key="comp2")
+        
+        st.write("Comparando as duas colunas ao longo do tempo:")
+
+        # Gráfico de linha comparativo (se "Data" estiver disponível)
+        if "Data" in df_filtrado.columns:
+            fig_line, ax_line = plt.subplots(figsize=(10, 5))
+            df_group = df_filtrado.groupby("Data")[[col1_selecionada, col2_selecionada]].mean().reset_index()
+            sns.lineplot(data=df_group, x="Data", y=col1_selecionada, marker="o", label=col1_selecionada, ax=ax_line)
+            sns.lineplot(data=df_group, x="Data", y=col2_selecionada, marker="o", label=col2_selecionada, ax=ax_line)
+            ax_line.set_title(f"Comparação Temporal: {col1_selecionada} vs {col2_selecionada}")
+            ax_line.set_xlabel("Data")
+            ax_line.set_ylabel("Valor Médio")
+            st.pyplot(fig_line)
+            st.write("""
+            No gráfico acima, as linhas mostram a evolução média dos valores exportados para as duas categorias ao longo do tempo.
+            Essa comparação permite identificar tendências relativas, possíveis correlações e impactos de eventos econômicos sobre o comércio.
+            """)
+        else:
+            st.write("O gráfico temporal não pode ser exibido pois a coluna 'Data' não está disponível.")
+
+        # Gráfico de dispersão para comparar as duas colunas
+        st.subheader("Análise Comparativa: Gráfico de Dispersão")
+        fig_scatter, ax_scatter = plt.subplots(figsize=(8, 5))
+        sns.scatterplot(data=df_filtrado, x=col1_selecionada, y=col2_selecionada, hue="Data", palette="viridis", ax=ax_scatter)
+        ax_scatter.set_title(f"Relação entre {col1_selecionada} e {col2_selecionada}")
+        ax_scatter.set_xlabel(col1_selecionada)
+        ax_scatter.set_ylabel(col2_selecionada)
+        st.pyplot(fig_scatter)
+        st.write("""
+        O gráfico de dispersão apresenta a relação entre os valores das duas categorias selecionadas.  
+        As cores representam os diferentes anos, permitindo observar padrões sazonais, correlações ou mudanças estruturais ao longo do tempo.
+        """)
+
+        st.write("---")
+        st.subheader("Conclusões e Impactos no Contexto da Exportação Brasileira")
+        st.write("""
+        **Para entendimento**
+        - O ano de 2025 não está completo pois o ano ainda está em andamento, o que pode afetar a média e a mediana.
+        - O os anos de 2020 até 2022 foram impactados pela pandemia de COVID-19, o que pode ter influenciado os dados de exportação.
+        **Interpretação Geral:**
+        - Os testes estatísticos ajudam a identificar se há mudanças significativas e se os valores exportados se distribuem de forma homogênea.
+        - A comparação entre colunas, filtrada por anos, revela diferenças de comportamento entre setores, podendo indicar o efeito de políticas econômicas, variações na demanda internacional e eventos macroeconômicos.
+        
+        **Sugestões de Interpretação:**
+        - Se os testes indicarem diferenças significativas, isso pode refletir transformações nos investimentos e na competitividade dos produtos brasileiros.
+        - Variações nos gráficos temporais podem estar associadas a crises econômicas, flutuações cambiais ou mudanças na política de incentivo às exportações.
+        - A correlação entre diferentes setores pode evidenciar sinergias ou compensações, proporcionando insights sobre a dinâmica do comércio exterior.
+        """)
 
