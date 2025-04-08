@@ -11,17 +11,17 @@ from streamlit_extras.app_logo import add_logo
 st.set_page_config(page_title="Exportação Brasileira", layout="wide")
 
 # Criando as páginas
-menu = ["Home 🏠", "Dados 📊", "Análise 📋"]
+menu = ["Home 🏠", "Dados 📊", "Análise 📋", "Entendimentos 📚"]
 escolha = st.sidebar.radio("", menu)
 
 # Sessão de Colaboradores
 st.sidebar.title("Colaboradores 🤝")
 colaboradores = [
-    {"nome": "Vinicius Silva - RM553240", "foto": "vinicius.jpg"},
-    {"nome": "Diogo Julio - RM553837", "foto": "diogo.jpg"},
-    {"nome": "Jonata Rafael - RM552939", "foto": "jonata.jpg"},
-    {"nome": "Victor Didoff - RM552965", "foto": "didoff.jpg"},
-    {"nome": "Matheu Zottis - RM94119", "foto": "zottis.jpg"},
+    {"nome": "Vinicius Silva - RM553240", "foto": "img/vinicius.jpg"},
+    {"nome": "Diogo Julio - RM553837", "foto": "img/diogo.jpg"},
+    {"nome": "Jonata Rafael - RM552939", "foto": "img/jonata.jpg"},
+    {"nome": "Victor Didoff - RM552965", "foto": "img/didoff.jpg"},
+    {"nome": "Matheu Zottis - RM94119", "foto": "img/zottis.jpg"},
 ]
 
 for colaborador in colaboradores:
@@ -42,7 +42,7 @@ df = pd.read_excel(file_path)
 
 if escolha == "Home 🏠":
     st.title("Exportação Brasileira")
-    st.image("porto-de-santos.jpg", use_container_width=True)
+    st.image("img/porto-de-santos.jpg", use_container_width=True)
     st.write("""
     A exportação é um dos principais motores da economia brasileira, abrangendo diversos setores, 
     desde produtos agrícolas até manufaturados e bens de capital. Entender os dados da exportação 
@@ -277,20 +277,31 @@ elif escolha == "Análise 📋":
         O gráfico de dispersão apresenta a relação entre os valores das duas categorias selecionadas.  
         As cores representam os diferentes anos, permitindo observar padrões sazonais, correlações ou mudanças estruturais ao longo do tempo.
         """)
-
-        st.write("---")
-        st.subheader("Conclusões e Impactos no Contexto da Exportação Brasileira")
-        st.write("""
-        **Para entendimento**
-        - O ano de 2025 não está completo pois o ano ainda está em andamento, o que pode afetar a média e a mediana.
-        - O os anos de 2020 até 2022 foram impactados pela pandemia de COVID-19, o que pode ter influenciado os dados de exportação.
-        **Interpretação Geral:**
-        - Os testes estatísticos ajudam a identificar se há mudanças significativas e se os valores exportados se distribuem de forma homogênea.
-        - A comparação entre colunas, filtrada por anos, revela diferenças de comportamento entre setores, podendo indicar o efeito de políticas econômicas, variações na demanda internacional e eventos macroeconômicos.
         
-        **Sugestões de Interpretação:**
-        - Se os testes indicarem diferenças significativas, isso pode refletir transformações nos investimentos e na competitividade dos produtos brasileiros.
-        - Variações nos gráficos temporais podem estar associadas a crises econômicas, flutuações cambiais ou mudanças na política de incentivo às exportações.
-        - A correlação entre diferentes setores pode evidenciar sinergias ou compensações, proporcionando insights sobre a dinâmica do comércio exterior.
-        """)
+elif escolha == "Entendimentos 📚":
+    st.write("---")
+    st.subheader("Conclusões e Impactos no Contexto da Exportação Brasileira")
+
+    st.image("img/ExpoBR.jpg", width=80)
+    st.markdown("""
+    **🗓️ Para entendimento:**
+    - O ano de **2025 ainda está em andamento**, o que pode afetar medidas como média, mediana e interpretação de tendências.
+    - Os anos de **2020 a 2022 foram impactados pela pandemia da COVID-19**, influenciando negativamente cadeias produtivas e fluxos comerciais.
+    """)
+
+
+    st.image("img\covid", width=80)
+    st.markdown("""
+    **📊 Interpretação Geral:**
+    - Os **testes estatísticos** ajudam a entender se houve **mudanças significativas** nos padrões de exportação e se os dados estão distribuídos uniformemente.
+    - A **comparação entre categorias de exportação**, filtradas por período, permite identificar **diferenças setoriais** ligadas a políticas públicas, flutuações da demanda internacional e eventos econômicos relevantes.
+    """)
+
+    st.image("img/BREXPO.png", width=80)
+    st.markdown("""
+    **💡 Sugestões de Interpretação:**
+    - Resultados estatísticos significativos podem indicar **transformações nos investimentos** ou **na competitividade dos setores** exportadores.
+    - Gráficos temporais ajudam a identificar impactos de **crises econômicas**, **variações cambiais** e **mudanças nas políticas de incentivo**.
+    - Correlações entre setores podem revelar **relações de dependência ou complementaridade**, mostrando a **dinâmica do comércio exterior brasileiro**.
+    """)
 
