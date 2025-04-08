@@ -274,6 +274,7 @@ elif escolha == "Entendimentos 📚":
     **🗓️ Para entendimento:**
     - O ano de **2025 ainda está em andamento**, o que pode afetar medidas como média, mediana e interpretação de tendências.
     - Os anos de **2020 a 2022 foram impactados pela pandemia da COVID-19**, influenciando negativamente cadeias produtivas e fluxos comerciais.
+    - O ano de **2023 apresenta uma recuperação gradual**, mas os dados ainda podem ser afetados por incertezas econômicas e políticas.
     """)
 
 
