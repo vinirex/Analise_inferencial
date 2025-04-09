@@ -45,7 +45,6 @@ Este projeto foi desenvolvido pelos seguintes membros:
 - **OpenPyXL**: Leitura de arquivos Excel.
 
 ## Como Executar o Projeto
-## Como Executar o Projeto
 
 1. Clone este repositório:
     ```bash
