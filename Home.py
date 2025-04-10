@@ -148,14 +148,55 @@ elif escolha == "Dados 📊":
     st.write("O histograma permite observar a frequência dos valores exportados. Picos indicam valores mais recorrentes. "
              "A curva de densidade (KDE) ajuda a visualizar a forma geral da distribuição: simétrica, enviesada, etc.")
 
-    # BOXPLOT
-    st.subheader("Boxplot da Coluna")
-    fig_box, ax_box = plt.subplots(figsize=(6, 4))
-    sns.boxplot(y=data_for_analysis[selected_column], ax=ax_box)
-    ax_box.set_title(f"Boxplot de {selected_column}")
-    st.pyplot(fig_box)
-    st.write("O boxplot ajuda a visualizar a dispersão dos dados, valores extremos (outliers) e a mediana. "
-             "É útil para avaliar a consistência das exportações ao longo do tempo.")
+
+    # Selecionar apenas colunas de valor
+    colunas_valor = ["Valor_BK", "Valor_BI", "Valor_BC", "Valor_CL"]
+    df_valores = df[colunas_valor].dropna()
+
+    # Calcular intervalo de confiança 95% para cada coluna
+    intervalos = []
+    for coluna in colunas_valor:
+        dados = df_valores[coluna].dropna()
+        media = np.mean(dados)
+        desvio = np.std(dados, ddof=1)
+        n = len(dados)
+        erro = desvio / np.sqrt(n)
+        intervalo = stats.t.interval(0.95, df=n-1, loc=media, scale=erro)
+        
+        intervalos.append({
+            "Coluna": coluna,
+            "Média": round(media, 2),
+            "Erro Padrão": round(erro, 2),
+            "Limite Inferior (95%)": round(intervalo[0], 2),
+            "Limite Superior (95%)": round(intervalo[1], 2)
+        })
+
+    df_intervalos = pd.DataFrame(intervalos)
+
+    st.subheader("📊 Gráfico: Médias e Intervalos de Confiança (95%)")
+    fig, ax = plt.subplots(figsize=(8, 5))
+    medias = df_intervalos["Média"]
+    erros = df_intervalos["Erro Padrão"]
+    labels = df_intervalos["Coluna"]
+
+    ax.bar(labels, medias, yerr=erros * stats.t.ppf(0.975, df=len(df_valores)-1), capsize=10, color="#2A9D8F")
+    ax.set_ylabel("Valor Médio Exportado")
+    ax.set_title("Intervalos de Confiança das Exportações (95%)")
+    ax.grid(axis="y", linestyle="--", alpha=0.5)
+
+    st.pyplot(fig)
+
+    # Interpretação
+    st.subheader("📌 Interpretação")
+    st.write("""
+    - As barras mostram a **média das exportações** de cada categoria.
+    - As **linhas verticais (barras de erro)** representam o intervalo de confiança de 95%.
+    - Intervalos mais estreitos indicam menor variabilidade, maior estabilidade.
+    - Intervalos mais largos sugerem alta oscilação nos valores ao longo do tempo.
+
+    Esses dados ajudam a compreender a **confiabilidade das exportações brasileiras** por tipo de bem, e a comparar quais setores são mais consistentes ou voláteis.
+    """)
+
     
     
 elif escolha == "Análise 📋":
@@ -264,6 +305,8 @@ elif escolha == "Análise 📋":
             """)
         else:
             st.write("O gráfico temporal não pode ser exibido pois a coluna 'Data' não está disponível.")
+        
+    
 
 elif escolha == "Entendimentos 📚":
     st.write("---")
@@ -273,6 +316,7 @@ elif escolha == "Entendimentos 📚":
     st.markdown("""
     **🗓️ Para entendimento:**
     - O ano de **2025 ainda está em andamento**, o que pode afetar medidas como média, mediana e interpretação de tendências.
+    - Durante a Pandemia houve um aumento nas exportações.
     - Os anos de **2020 a 2022 foram impactados pela pandemia da COVID-19**, influenciando negativamente cadeias produtivas e fluxos comerciais.
     - O ano de **2023 apresenta uma recuperação gradual**, mas os dados ainda podem ser afetados por incertezas econômicas e políticas.
     """)
