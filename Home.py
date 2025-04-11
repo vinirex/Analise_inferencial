@@ -139,16 +139,7 @@ elif escolha == "Dados 📊":
     st.write("Este gráfico de linha mostra como os valores dessa categoria de exportação variaram ao longo dos anos. "
              "É útil para identificar tendências, ciclos ou quedas bruscas relacionadas a eventos econômicos ou políticas externas.")
 
-    # HISTOGRAMA
-    st.subheader("Distribuição dos Valores")
-    fig_hist, ax_hist = plt.subplots(figsize=(8, 4))
-    sns.histplot(data_for_analysis[selected_column], bins=20, kde=True, ax=ax_hist)
-    ax_hist.set_title(f"Distribuição de {selected_column}")
-    st.pyplot(fig_hist)
-    st.write("O histograma permite observar a frequência dos valores exportados. Picos indicam valores mais recorrentes. "
-             "A curva de densidade (KDE) ajuda a visualizar a forma geral da distribuição: simétrica, enviesada, etc.")
-
-
+    
     # Selecionar apenas colunas de valor
     colunas_valor = ["Valor_BK", "Valor_BI", "Valor_BC", "Valor_CL"]
     df_valores = df[colunas_valor].dropna()
@@ -196,6 +187,16 @@ elif escolha == "Dados 📊":
 
     Esses dados ajudam a compreender a **confiabilidade das exportações brasileiras** por tipo de bem, e a comparar quais setores são mais consistentes ou voláteis.
     """)
+
+    # HISTOGRAMA
+    st.subheader("Distribuição dos Valores")
+    fig_hist, ax_hist = plt.subplots(figsize=(8, 4))
+    sns.histplot(data_for_analysis[selected_column], bins=20, kde=True, ax=ax_hist)
+    ax_hist.set_title(f"Distribuição de {selected_column}")
+    st.pyplot(fig_hist)
+    st.write("O histograma permite observar a frequência dos valores exportados. Picos indicam valores mais recorrentes. "
+            "A curva de densidade (KDE) ajuda a visualizar a forma geral da distribuição: simétrica, enviesada, etc.")
+
 
     
     
