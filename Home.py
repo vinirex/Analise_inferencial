@@ -318,7 +318,8 @@ elif escolha == "Entendimentos 📚":
     **🗓️ Para entendimento:**
     - O ano de **2025 ainda está em andamento**, o que pode afetar medidas como média, mediana e interpretação de tendências.
     - Durante a Pandemia houve um aumento nas exportações.
-    - Os anos de **2020 a 2022 foram impactados pela pandemia da COVID-19**, influenciando negativamente cadeias produtivas e fluxos comerciais.
+    - Os anos de **2020 a 2022 foram impactados pela pandemia da COVID-19**, influenciando cadeias produtivas e fluxos comerciais.
+    - Nos anos de pandemia, o uso de serviços de comércio eletrônico aumentou causando um aumento das movimentações.
     - O ano de **2023 apresenta uma recuperação gradual**, mas os dados ainda podem ser afetados por incertezas econômicas e políticas.
     """)
 
