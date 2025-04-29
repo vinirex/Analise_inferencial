@@ -139,55 +139,6 @@ elif escolha == "Dados 📊":
     st.write("Este gráfico de linha mostra como os valores dessa categoria de exportação variaram ao longo dos anos. "
              "É útil para identificar tendências, ciclos ou quedas bruscas relacionadas a eventos econômicos ou políticas externas.")
 
-    
-    # Selecionar apenas colunas de valor
-    colunas_valor = ["Valor_BK", "Valor_BI", "Valor_BC", "Valor_CL"]
-    df_valores = df[colunas_valor].dropna()
-
-    # Calcular intervalo de confiança 95% para cada coluna
-    intervalos = []
-    for coluna in colunas_valor:
-        dados = df_valores[coluna].dropna()
-        media = np.mean(dados)
-        desvio = np.std(dados, ddof=1)
-        n = len(dados)
-        erro = desvio / np.sqrt(n)
-        intervalo = stats.t.interval(0.95, df=n-1, loc=media, scale=erro)
-        
-        intervalos.append({
-            "Coluna": coluna,
-            "Média": round(media, 2),
-            "Erro Padrão": round(erro, 2),
-            "Limite Inferior (95%)": round(intervalo[0], 2),
-            "Limite Superior (95%)": round(intervalo[1], 2)
-        })
-
-    df_intervalos = pd.DataFrame(intervalos)
-
-    st.subheader("📊 Gráfico: Médias e Intervalos de Confiança (95%)")
-    fig, ax = plt.subplots(figsize=(8, 5))
-    medias = df_intervalos["Média"]
-    erros = df_intervalos["Erro Padrão"]
-    labels = df_intervalos["Coluna"]
-
-    ax.bar(labels, medias, yerr=erros * stats.t.ppf(0.975, df=len(df_valores)-1), capsize=10, color="#2A9D8F")
-    ax.set_ylabel("Valor Médio Exportado")
-    ax.set_title("Intervalos de Confiança das Exportações (95%)")
-    ax.grid(axis="y", linestyle="--", alpha=0.5)
-
-    st.pyplot(fig)
-
-    # Interpretação
-    st.subheader("📌 Interpretação")
-    st.write("""
-    - As barras mostram a **média das exportações** de cada categoria.
-    - As **linhas verticais (barras de erro)** representam o intervalo de confiança de 95%.
-    - Intervalos mais estreitos indicam menor variabilidade, maior estabilidade.
-    - Intervalos mais largos sugerem alta oscilação nos valores ao longo do tempo.
-
-    Esses dados ajudam a compreender a **confiabilidade das exportações brasileiras** por tipo de bem, e a comparar quais setores são mais consistentes ou voláteis.
-    """)
-
     # HISTOGRAMA
     st.subheader("Distribuição dos Valores")
     fig_hist, ax_hist = plt.subplots(figsize=(8, 4))
@@ -195,56 +146,57 @@ elif escolha == "Dados 📊":
     ax_hist.set_title(f"Distribuição de {selected_column}")
     st.pyplot(fig_hist)
     st.write("O histograma permite observar a frequência dos valores exportados. Picos indicam valores mais recorrentes. "
-            "A curva de densidade (KDE) ajuda a visualizar a forma geral da distribuição: simétrica, enviesada, etc.")
+             "A curva de densidade (KDE) ajuda a visualizar a forma geral da distribuição: simétrica, enviesada, etc.")
 
-
+    # BOXPLOT
+    st.subheader("Boxplot da Coluna")
+    fig_box, ax_box = plt.subplots(figsize=(6, 4))
+    sns.boxplot(y=data_for_analysis[selected_column], ax=ax_box)
+    ax_box.set_title(f"Boxplot de {selected_column}")
+    st.pyplot(fig_box)
+    st.write("O boxplot ajuda a visualizar a dispersão dos dados, valores extremos (outliers) e a mediana. "
+             "É útil para avaliar a consistência das exportações ao longo do tempo.")
     
     
 elif escolha == "Análise 📋":
     st.title("Análise Estatística e Comparativa das Exportações")
 
-    st.subheader("1. Análise de Testes Estatísticos")
-    st.write("""
-    Nesta seção, aplicamos testes estatísticos para avaliar se os valores das exportações de Bens de Capital (Valor_BK) 
-    têm sofrido variações significativas ao longo do tempo.
-    """)
-    
-    # Selecionar coluna para teste estatístico
-    coluna_valor = "Valor_BK"  # Representa os valores dos Bens de Capital
+    # Selecionar coluna de Bens de Capital
+    coluna_valor = "Valor_BK"
     valores = df[coluna_valor].dropna()
-    
-    # Teste t para comparar a média observada com uma média teórica (redução de 10%)
-    media_teorica = valores.mean() * 0.9
-    t_stat, p_valor = stats.ttest_1samp(valores, media_teorica)
-    
-    st.subheader("Teste t para uma Amostra")
-    st.write("""
-    **Objetivo:** Verificar se a média dos valores exportados difere significativamente de um valor hipotético (redução de 10% da média atual).  
-    **Interpretação:** Se o valor-p for menor que 0.05, rejeitamos a hipótese nula, indicando mudança significativa.
-    """)
-    st.write(f"Estatística t: {t_stat:.4f}")
-    st.write(f"Valor-p: {p_valor:.4f}")
-    if p_valor < 0.05:
-        st.write("Conclusão: Rejeitamos H₀. Evidências apontam para mudanças significativas nas exportações de Bens de Capital.")
-    else:
-        st.write("Conclusão: Falhamos em rejeitar H₀. Não há evidências suficientes de mudança significativa.")
 
-    st.subheader("Teste Qui-Quadrado")
-    st.write("""
-    **Objetivo:** Analisar se a distribuição dos valores de exportação se distribui uniformemente entre diferentes faixas.  
-    **Interpretação:** Um valor-p menor que 0.05 indica que os valores não estão uniformemente distribuídos, sugerindo concentração em certos intervalos.
-    """)
-    df["Faixa de Valor"] = pd.qcut(df[coluna_valor], q=4, labels=["Baixo", "Médio-Baixo", "Médio-Alto", "Alto"])
-    contagem_faixas = df["Faixa de Valor"].value_counts()
-    chi2, p_chi = stats.chisquare(contagem_faixas)
-    st.write(f"Estatística Qui-Quadrado: {chi2:.4f}")
-    st.write(f"Valor-p: {p_chi:.4f}")
-    if p_chi < 0.05:
-        st.write("Conclusão: Rejeitamos H₀. A distribuição dos valores não é uniforme.")
-    else:
-        st.write("Conclusão: Falhamos em rejeitar H₀. Não há evidências suficientes para afirmar que a distribuição seja desigual.")
+    # Cálculo da média brasileira
+    media_brasil = valores.mean()
+    desvio_brasil = valores.std()
+    n_brasil = len(valores)
 
-    st.write("---")
+    st.write(f"**Média das Exportações de Bens de Capital (Brasil):** {media_brasil:,.2f}")
+
+    # Valor fornecido para os EUA
+    media_eua = 38591.73
+    st.write(f"**Média das Exportações de Bens de Capital (EUA):** {media_eua:,.2f}")
+
+    # Criar uma amostra dos EUA com mesma quantidade de dados
+    dados_eua = np.full(shape=n_brasil, fill_value=media_eua)
+
+    # Teste t de comparação de médias (unilateral, Brasil > EUA)
+    t_stat_bk, p_valor_bk = stats.ttest_ind(valores, dados_eua, alternative='greater')
+
+    st.subheader("Teste T: Brasil vs EUA (Bens de Capital)")
+    st.write("""
+    **Hipóteses:**
+    - H₀: Média Brasil ≤ Média EUA
+    - H₁: Média Brasil > Média EUA
+    """)
+
+    st.write(f"**Estatística t:** {t_stat_bk:.4f}")
+    st.write(f"**Valor-p (unilateral):** {p_valor_bk:.4f}")
+
+    if p_valor_bk < 0.05:
+        st.success("Conclusão: Rejeitamos H₀. Há evidências de que a média de exportação brasileira de Bens de Capital é maior que a dos Estados Unidos.")
+    else:
+        st.info("Conclusão: Falhamos em rejeitar H₀. Não há evidências suficientes para afirmar que a média brasileira de Bens de Capital seja maior que a dos EUA.")
+        st.write("---")
     st.subheader("2. Comparação entre Colunas e Filtros por Ano")
     st.write("""
     Nesta seção, você pode comparar a evolução de duas categorias de exportação ao longo dos anos.  
@@ -306,8 +258,6 @@ elif escolha == "Análise 📋":
             """)
         else:
             st.write("O gráfico temporal não pode ser exibido pois a coluna 'Data' não está disponível.")
-        
-    
 
 elif escolha == "Entendimentos 📚":
     st.write("---")
@@ -317,9 +267,7 @@ elif escolha == "Entendimentos 📚":
     st.markdown("""
     **🗓️ Para entendimento:**
     - O ano de **2025 ainda está em andamento**, o que pode afetar medidas como média, mediana e interpretação de tendências.
-    - Durante a Pandemia houve um aumento nas exportações.
-    - Os anos de **2020 a 2022 foram impactados pela pandemia da COVID-19**, influenciando cadeias produtivas e fluxos comerciais.
-    - Nos anos de pandemia, o uso de serviços de **comércio eletrônico** se popularizou causando um aumento das movimentações.
+    - Os anos de **2020 a 2022 foram impactados pela pandemia da COVID-19**, influenciando negativamente cadeias produtivas e fluxos comerciais.
     - O ano de **2023 apresenta uma recuperação gradual**, mas os dados ainda podem ser afetados por incertezas econômicas e políticas.
     """)
 
