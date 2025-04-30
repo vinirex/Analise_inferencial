@@ -160,50 +160,13 @@ elif escolha == "Dados 📊":
     
 elif escolha == "Análise 📋":
     st.title("Análise Estatística e Comparativa das Exportações")
-
-    # Selecionar coluna de Bens de Capital
-    coluna_valor = "Valor_BK"
-    valores = df[coluna_valor].dropna()
-
-    # Cálculo da média brasileira
-    media_brasil = valores.mean()
-    desvio_brasil = valores.std()
-    n_brasil = len(valores)
-
-    st.write(f"**Média das Exportações de Bens de Capital (Brasil):** {media_brasil:,.2f}")
-
-    # Valor fornecido para os EUA
-    media_eua = 38591.73
-    st.write(f"**Média das Exportações de Bens de Capital (EUA):** {media_eua:,.2f}")
-
-    # Criar uma amostra dos EUA com mesma quantidade de dados
-    dados_eua = np.full(shape=n_brasil, fill_value=media_eua)
-
-    # Teste t de comparação de médias (unilateral, Brasil > EUA)
-    t_stat_bk, p_valor_bk = stats.ttest_ind(valores, dados_eua, alternative='greater')
-
-    st.subheader("Teste T: Brasil vs EUA (Bens de Capital)")
-    st.write("""
-    **Hipóteses:**
-    - H₀: Média Brasil ≤ Média EUA
-    - H₁: Média Brasil > Média EUA
-    """)
-
-    st.write(f"**Estatística t:** {t_stat_bk:.4f}")
-    st.write(f"**Valor-p (unilateral):** {p_valor_bk:.4f}")
-
-    if p_valor_bk < 0.05:
-        st.success("Conclusão: Rejeitamos H₀. Há evidências de que a média de exportação brasileira de Bens de Capital é maior que a dos Estados Unidos.")
-    else:
-        st.info("Conclusão: Falhamos em rejeitar H₀. Não há evidências suficientes para afirmar que a média brasileira de Bens de Capital seja maior que a dos EUA.")
-        st.write("---")
-    st.subheader("2. Comparação entre Colunas e Filtros por Ano")
+    st.subheader("1. Comparação entre Colunas e Filtros por Ano")
     st.write("""
     Nesta seção, você pode comparar a evolução de duas categorias de exportação ao longo dos anos.  
     Utilize o filtro de anos para limitar a análise a um período específico e observe como os setores se comportam.
     """)
     
-   # Filtro por intervalo de Data (mantendo valores reais da coluna "Data")
+    # Filtro por intervalo de Data (mantendo valores reais da coluna "Data")
     if "Data" in df.columns:
         datas = sorted(df["Data"].dropna().unique())
 
@@ -225,39 +188,111 @@ elif escolha == "Análise 📋":
             else:
                 df_filtrado = df[(df["Data"] >= data_inicio) & (df["Data"] <= data_fim)]
                 st.write(f"Exibindo dados do período: {data_inicio} até {data_fim}")
-                df_filtrado = df.copy()
-        
+
         col_comp1, col_comp2 = st.columns(2)
         # Ensure numeric_cols is defined before this block
         numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
         if "Data" in numeric_cols:
             numeric_cols.remove("Data")
-        
-        with col_comp1:
-            col1_selecionada = st.selectbox("Selecione a 1ª coluna para comparação:", numeric_cols, key="comp1")
-        with col_comp2:
-            # Remover a coluna selecionada na primeira seleção para evitar comparação duplicada
-            cols_disp = [col for col in numeric_cols if col != col1_selecionada]
-            col2_selecionada = st.selectbox("Selecione a 2ª coluna para comparação:", cols_disp, key="comp2")
-        
-        st.write("Comparando as duas colunas ao longo do tempo:")
+            
+            with col_comp1:
+                col1_selecionada = st.selectbox("Selecione a 1ª coluna para comparação:", numeric_cols, key="comp1")
+            with col_comp2:
+                # Remover a coluna selecionada na primeira seleção para evitar comparação duplicada
+                cols_disp = [col for col in numeric_cols if col != col1_selecionada]
+                col2_selecionada = st.selectbox("Selecione a 2ª coluna para comparação:", cols_disp, key="comp2")
+            
+            st.write("Comparando as duas colunas ao longo do tempo:")
 
-        # Gráfico de linha comparativo (se "Data" estiver disponível)
-        if "Data" in df_filtrado.columns:
-            fig_line, ax_line = plt.subplots(figsize=(10, 5))
-            df_group = df_filtrado.groupby("Data")[[col1_selecionada, col2_selecionada]].mean().reset_index()
-            sns.lineplot(data=df_group, x="Data", y=col1_selecionada, marker="o", label=col1_selecionada, ax=ax_line)
-            sns.lineplot(data=df_group, x="Data", y=col2_selecionada, marker="o", label=col2_selecionada, ax=ax_line)
-            ax_line.set_title(f"Comparação Temporal: {col1_selecionada} vs {col2_selecionada}")
-            ax_line.set_xlabel("Data")
-            ax_line.set_ylabel("Valor Médio")
-            st.pyplot(fig_line)
-            st.write("""
-            No gráfico acima, as linhas mostram a evolução média dos valores exportados para as duas categorias ao longo do tempo.
-            Essa comparação permite identificar tendências relativas, possíveis correlações e impactos de eventos econômicos sobre o comércio.
-            """)
-        else:
-            st.write("O gráfico temporal não pode ser exibido pois a coluna 'Data' não está disponível.")
+            # Gráfico de linha comparativo (se "Data" estiver disponível)
+            if "Data" in df_filtrado.columns:
+                fig_line, ax_line = plt.subplots(figsize=(10, 5))
+                df_group = df_filtrado.groupby("Data")[[col1_selecionada, col2_selecionada]].mean().reset_index()
+                sns.lineplot(data=df_group, x="Data", y=col1_selecionada, marker="o", label=col1_selecionada, ax=ax_line)
+                sns.lineplot(data=df_group, x="Data", y=col2_selecionada, marker="o", label=col2_selecionada, ax=ax_line)
+                ax_line.set_title(f"Comparação Temporal: {col1_selecionada} vs {col2_selecionada}")
+                ax_line.set_xlabel("Data")
+                ax_line.set_ylabel("Valor Médio")
+                st.pyplot(fig_line)
+                st.write("""
+                No gráfico acima, as linhas mostram a evolução média dos valores exportados para as duas categorias ao longo do tempo.
+                Essa comparação permite identificar tendências relativas, possíveis correlações e impactos de eventos econômicos sobre o comércio.
+                """)
+            else:
+                st.write("O gráfico temporal não pode ser exibido pois a coluna 'Data' não está disponível.")
+    st.write("---")
+
+    st.subheader("2. Comparação de Médias Bens de Capital : Brasil vs EUA")
+
+    # Selecionar coluna de Bens de Capital
+    coluna_valor = "Valor_BK"
+    valores = df[coluna_valor].dropna()
+
+    # Cálculo da média brasileira
+    media_brasil = valores.mean()
+    desvio_brasil = valores.std()
+    n_brasil = len(valores)
+
+    st.write(f"**Média das Exportações de Bens de Capital (Brasil):** {media_brasil:,.2f}")
+
+    # Valor fornecido para os EUA
+    media_eua = 38591.73
+    st.write(f"**Média das Exportações de Bens de Capital (EUA):** {media_eua:,.2f}")
+
+    # Boxplot comparando as médias Brasil x EUA
+    dados_eua = np.full(shape=n_brasil, fill_value=media_eua)
+    df_box = pd.DataFrame({
+        "Valor": np.concatenate([valores, dados_eua]),
+        "Grupo": ["Brasil"] * n_brasil + ["EUA"] * n_brasil
+    })
+    st.subheader("Boxplot Comparativo das Médias (Brasil x EUA)")
+    fig_box, ax_box = plt.subplots(figsize=(6, 4))
+    sns.boxplot(x="Grupo", y="Valor", data=df_box, ax=ax_box)
+    ax_box.set_title("Comparação das Médias de Exportação de Bens de Capital")
+    st.pyplot(fig_box)
+
+    # Tabela descritiva com média dos dois grupos
+    media_brasil = valores.mean()
+    media_eua = dados_eua.mean()
+    tabela_medias = pd.DataFrame({
+        "Grupo": ["Brasil", "EUA"],
+        "Média": [media_brasil, media_eua]
+    })
+    st.subheader("Tabela de Médias dos Grupos")
+    st.table(tabela_medias)
+
+    # Tabela de N e desvio padrão dos dois grupos
+    desvio_eua = dados_eua.std()
+    tabela_n_desvio = pd.DataFrame({
+        "Grupo": ["Brasil", "EUA"],
+        "N": [n_brasil, n_brasil],
+        "Desvio Padrão": [desvio_brasil, desvio_eua]
+    })
+    st.subheader("Tabela de N e Desvio Padrão dos Grupos")
+    st.table(tabela_n_desvio)
+
+    # Criar uma amostra dos EUA com mesma quantidade de dados
+    dados_eua = np.full(shape=n_brasil, fill_value=media_eua)
+
+    # Teste t de comparação de médias (unilateral, Brasil > EUA)
+    t_stat_bk, p_valor_bk = stats.ttest_ind(valores, dados_eua, alternative='greater')
+
+    st.subheader("Teste T: Brasil vs EUA (Bens de Capital)")
+    st.write("""
+    **Hipóteses:**
+    - H₀: Média Brasil ≤ Média EUA
+    - H₁: Média Brasil > Média EUA
+    """)
+
+    st.write(f"**Estatística t:** {t_stat_bk:.4f}")
+    st.write(f"**Valor-p (unilateral):** {p_valor_bk:.4f}")
+
+    if p_valor_bk < 0.05:
+        st.success("Conclusão: Rejeitamos H₀. Há evidências de que a média de exportação brasileira de Bens de Capital é maior que a dos Estados Unidos.")
+    else:
+        st.info("Conclusão: Falhamos em rejeitar H₀. Não há evidências suficientes para afirmar que a média brasileira de Bens de Capital seja maior que a dos EUA.")
+        
+    
 
 elif escolha == "Entendimentos 📚":
     st.write("---")
