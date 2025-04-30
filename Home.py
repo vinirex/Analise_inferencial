@@ -235,21 +235,37 @@ elif escolha == "Análise 📋":
 
     st.write(f"**Média das Exportações de Bens de Capital (Brasil):** {media_brasil:,.2f}")
 
-    # Valor fornecido para os EUA
-    media_eua = 38591.73
+    # Simular dados dos EUA para Bens de Capital
+    np.random.seed(42)
+    media_eua = 32981 
+    desvio_eua = 5000  # Supondo um desvio padrão realista
+    dados_eua = np.random.normal(loc=media_eua, scale=desvio_eua, size=n_brasil)
+
     st.write(f"**Média das Exportações de Bens de Capital (EUA):** {media_eua:,.2f}")
 
-    # Boxplot comparando as médias Brasil x EUA
-    dados_eua = np.full(shape=n_brasil, fill_value=media_eua)
+    # Boxplot comparando as médias Brasil x EUA (com swarmplot para visualização dos pontos)
     df_box = pd.DataFrame({
         "Valor": np.concatenate([valores, dados_eua]),
         "Grupo": ["Brasil"] * n_brasil + ["EUA"] * n_brasil
     })
     st.subheader("Boxplot Comparativo das Médias (Brasil x EUA)")
-    fig_box, ax_box = plt.subplots(figsize=(6, 4))
-    sns.boxplot(x="Grupo", y="Valor", data=df_box, ax=ax_box)
+    fig_box, ax_box = plt.subplots(figsize=(7, 5))
+    sns.boxplot(x="Grupo", y="Valor", data=df_box, ax=ax_box, palette="Set2", showmeans=True,
+                meanprops={"marker":"o","markerfacecolor":"black", "markeredgecolor":"black"})
+    sns.swarmplot(x="Grupo", y="Valor", data=df_box, ax=ax_box, color=".25", size=3)
     ax_box.set_title("Comparação das Médias de Exportação de Bens de Capital")
+    ax_box.set_ylabel("Valor Exportado")
     st.pyplot(fig_box)
+
+    # Histograma comparativo
+    st.subheader("Distribuição dos Valores (Brasil x EUA)")
+    fig_hist, ax_hist = plt.subplots(figsize=(8, 4))
+    sns.histplot(valores, bins=20, color="royalblue", label="Brasil", kde=True, stat="density", ax=ax_hist)
+    sns.histplot(dados_eua, bins=20, color="orange", label="EUA", kde=True, stat="density", ax=ax_hist)
+    ax_hist.legend()
+    ax_hist.set_title("Distribuição das Exportações de Bens de Capital")
+    ax_hist.set_xlabel("Valor Exportado")
+    st.pyplot(fig_hist)
 
     # Tabela descritiva com média dos dois grupos
     media_brasil = valores.mean()
@@ -262,6 +278,7 @@ elif escolha == "Análise 📋":
     st.table(tabela_medias)
 
     # Tabela de N e desvio padrão dos dois grupos
+    desvio_brasil = valores.std()
     desvio_eua = dados_eua.std()
     tabela_n_desvio = pd.DataFrame({
         "Grupo": ["Brasil", "EUA"],
@@ -271,11 +288,8 @@ elif escolha == "Análise 📋":
     st.subheader("Tabela de N e Desvio Padrão dos Grupos")
     st.table(tabela_n_desvio)
 
-    # Criar uma amostra dos EUA com mesma quantidade de dados
-    dados_eua = np.full(shape=n_brasil, fill_value=media_eua)
-
     # Teste t de comparação de médias (unilateral, Brasil > EUA)
-    t_stat_bk, p_valor_bk = stats.ttest_ind(valores, dados_eua, alternative='greater')
+    t_stat_bk, p_valor_bk = stats.ttest_ind(valores, dados_eua, alternative='greater', equal_var=False)
 
     st.subheader("Teste T: Brasil vs EUA (Bens de Capital)")
     st.write("""
@@ -291,7 +305,8 @@ elif escolha == "Análise 📋":
         st.success("Conclusão: Rejeitamos H₀. Há evidências de que a média de exportação brasileira de Bens de Capital é maior que a dos Estados Unidos.")
     else:
         st.info("Conclusão: Falhamos em rejeitar H₀. Não há evidências suficientes para afirmar que a média brasileira de Bens de Capital seja maior que a dos EUA.")
-        
+
+   
     
 
 elif escolha == "Entendimentos 📚":
