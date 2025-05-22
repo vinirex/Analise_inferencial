@@ -147,15 +147,83 @@ elif escolha == "Dados 📊":
     st.pyplot(fig_hist)
     st.write("O histograma permite observar a frequência dos valores exportados. Picos indicam valores mais recorrentes. "
              "A curva de densidade (KDE) ajuda a visualizar a forma geral da distribuição: simétrica, enviesada, etc.")
+    
 
-    # BOXPLOT
-    st.subheader("Boxplot da Coluna")
-    fig_box, ax_box = plt.subplots(figsize=(6, 4))
-    sns.boxplot(y=data_for_analysis[selected_column], ax=ax_box)
-    ax_box.set_title(f"Boxplot de {selected_column}")
-    st.pyplot(fig_box)
-    st.write("O boxplot ajuda a visualizar a dispersão dos dados, valores extremos (outliers) e a mediana. "
-             "É útil para avaliar a consistência das exportações ao longo do tempo.")
+    # ANÁLISE DE REGRESSÃO LINEAR SIMPLES
+    st.subheader("Análise de Regressão Linear Simples")
+
+    if "Data" in data_for_analysis.columns:
+        # Converter 'Data' para numérico se for do tipo datetime ou string de ano
+        if np.issubdtype(data_for_analysis["Data"].dtype, np.datetime64):
+            x = data_for_analysis["Data"].dt.year.values
+        else:
+            try:
+                x = pd.to_numeric(data_for_analysis["Data"], errors="coerce").values
+            except Exception:
+                st.warning("Não foi possível converter a coluna 'Data' para formato numérico para regressão.")
+                x = None
+        y = data_for_analysis[selected_column].values
+
+        if x is not None and len(x) > 1:
+            # Remover valores nulos
+            mask = ~np.isnan(x) & ~np.isnan(y)
+            x_clean = x[mask]
+            y_clean = y[mask]
+
+            if len(x_clean) > 1:
+                # Regressão linear usando numpy
+                coef, intercept = np.polyfit(x_clean, y_clean, 1)
+                y_pred = coef * x_clean + intercept
+                # R² manual
+                ss_res = np.sum((y_clean - y_pred) ** 2)
+                ss_tot = np.sum((y_clean - np.mean(y_clean)) ** 2)
+                r2 = 1 - ss_res / ss_tot if ss_tot != 0 else np.nan
+
+                fig_reg, ax_reg = plt.subplots(figsize=(8, 4))
+                ax_reg.scatter(x_clean, y_clean, color="blue", label="Dados reais")
+                ax_reg.plot(x_clean, y_pred, color="red", label="Regressão Linear")
+                ax_reg.set_title(f"Regressão Linear: {selected_column} vs Ano")
+                ax_reg.set_xlabel("Ano")
+                ax_reg.set_ylabel(selected_column)
+                ax_reg.legend()
+                st.pyplot(fig_reg)
+
+                st.write(f"**Equação da reta:** {selected_column} = {coef:.2f} × Ano + {intercept:.2f}")
+                st.write(f"**R² (coeficiente de determinação):** {r2:.4f}")
+                if coef > 0:
+                    st.success("A inclinação positiva indica tendência de crescimento ao longo do tempo.")
+                elif coef < 0:
+                    st.info("A inclinação negativa indica tendência de queda ao longo do tempo.")
+                else:
+                    st.info("A inclinação zero indica estabilidade ao longo do tempo.")
+            else:
+                st.warning("Não foi possível realizar a regressão linear devido à falta de dados numéricos adequados em 'Data'.")
+        else:
+            st.warning("Não foi possível realizar a regressão linear devido à falta de dados numéricos adequados em 'Data'.")
+    else:
+        st.warning("A coluna 'Data' não está disponível para análise de regressão linear.")
+
+    # GRÁFICO ESTÁTICO COMPARANDO TODAS AS CATEGORIAS BK, BI, BC, CL
+    st.subheader("Comparação Estática: BK, BI, BC, CL")
+
+    categorias = ["Valor_BK", "Valor_BI", "Valor_BC", "Valor_CL"]
+    categorias_existentes = [cat for cat in categorias if cat in df.columns]
+
+    if categorias_existentes:
+        dados_plot = df[categorias_existentes].dropna()
+        fig_comp, ax_comp = plt.subplots(figsize=(10, 5))
+        sns.boxplot(data=dados_plot, ax=ax_comp)
+        ax_comp.set_title("Distribuição dos Valores Exportados: BK, BI, BC, CL")
+        ax_comp.set_ylabel("Valor Exportado")
+        ax_comp.set_xlabel("Categoria")
+        st.pyplot(fig_comp)
+        st.write(
+            "O gráfico acima compara a distribuição dos valores exportados para cada categoria: "
+            "**BK** (Bens de Capital), **BI** (Bens Intermediários), **BC** (Bens de Consumo) e **CL** (Combustíveis e Lubrificantes). "
+            "Isso permite visualizar diferenças de escala, dispersão e possíveis outliers entre os grupos."
+        )
+    else:
+        st.info("As colunas BK, BI, BC e CL não foram encontradas no dataset.")
     
     
 elif escolha == "Análise 📋":
